@@ -110,7 +110,7 @@ export default function InsightPage() {
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupSubreddits, setNewGroupSubreddits] = useState<Set<string>>(new Set());
-  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [_editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [selectedSubredditGroup, setSelectedSubredditGroup] = useState<string | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<'ai' | 'pain' | 'advice' | 'narrative'>('ai');
   const [selectedColorMetric, setSelectedColorMetric] = useState<'none' | 'comments' | 'ups' | 'date' | 'upvote_ratio'>('none');
