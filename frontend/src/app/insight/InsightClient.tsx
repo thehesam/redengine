@@ -13,7 +13,13 @@ function EmbeddingChart3D({ points }: { points: Array<{ x: number; y: number; z:
   const [PlotComponent, setPlotComponent] = useState<any>(null);
 
   useEffect(() => {
-    import('react-plotly.js').then(mod => setPlotComponent(() => mod.default));
+    Promise.all([
+      import('plotly.js-dist-min'),
+      import('react-plotly.js/factory'),
+    ]).then(([Plotly, factory]) => {
+      const createPlotlyComponent = factory.default;
+      setPlotComponent(() => createPlotlyComponent(Plotly.default));
+    });
   }, []);
 
   if (!PlotComponent || points.length === 0) return null;
