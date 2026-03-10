@@ -30,11 +30,24 @@ jobs:
       - name: Set image owner (lowercase)
         run: echo "OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-      # ── Debug: list frontend files ─────────────────────────────────────────
-      - name: List frontend source files
-        run: find ./frontend/src -type f | head -50
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-      # ── Backend ────────────────────────────────────────────────────────────
+      # ── Build frontend on the runner (full error logs visible) ─────────
+      - name: Install frontend deps
+        working-directory: ./frontend
+        run: npm install --legacy-peer-deps
+
+      - name: Build frontend
+        working-directory: ./frontend
+        env:
+          NEXT_PUBLIC_API_URL: ${{ env.NEXT_PUBLIC_API_URL }}
+          NEXT_TELEMETRY_DISABLED: 1
+        run: npm run build
+
+      # ── Build + push all 3 Docker images ───────────────────────────────
       - name: Build & push backend
         uses: docker/build-push-action@v5
         with:
@@ -42,24 +55,7 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.OWNER }}/redengine-backend:latest
 
-      # ── Frontend (plain build for error visibility) ────────────────────────
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install frontend deps
-        working-directory: ./frontend
-        run: npm install --legacy-peer-deps
-
-      - name: Test frontend build
-        working-directory: ./frontend
-        env:
-          NEXT_PUBLIC_API_URL: ${{ env.NEXT_PUBLIC_API_URL }}
-        run: npm run build
-
-      # ── Frontend Docker ────────────────────────────────────────────────────
-      - name: Build & push frontend image
+      - name: Build & push frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
@@ -68,7 +64,6 @@ jobs:
             NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}
           tags: ghcr.io/${{ env.OWNER }}/redengine-frontend:latest
 
-      # ── Nginx ──────────────────────────────────────────────────────────────
       - name: Build & push nginx
         uses: docker/build-push-action@v5
         with:
