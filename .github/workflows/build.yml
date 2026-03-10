@@ -47,6 +47,8 @@ jobs:
           build-args: |
             NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}
           tags: ghcr.io/${{ env.OWNER }}/redengine-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # ── Nginx ──────────────────────────────────────────────────────────────
       - name: Build & push nginx

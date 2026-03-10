@@ -4,7 +4,7 @@ WORKDIR /app
 # ---- deps stage: install all dependencies ----
 FROM base AS deps
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # ---- builder stage: compile Next.js ----
 FROM base AS builder

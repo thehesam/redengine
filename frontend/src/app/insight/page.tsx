@@ -1,5 +1,8 @@
 'use client';
 
+// Disable static pre-rendering for this dynamic page
+export const dynamic = 'force-dynamic';
+
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
