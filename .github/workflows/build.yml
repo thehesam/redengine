@@ -2,8 +2,8 @@ name: Build & Push Docker Images
 
 on:
   push:
-    branches: [main]
-  workflow_dispatch: # allow manual trigger from GitHub UI
+    branches: [main, master]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -30,6 +30,10 @@ jobs:
       - name: Set image owner (lowercase)
         run: echo "OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
+      # ── Debug: list frontend files ─────────────────────────────────────────
+      - name: List frontend source files
+        run: find ./frontend/src -type f | head -50
+
       # ── Backend ────────────────────────────────────────────────────────────
       - name: Build & push backend
         uses: docker/build-push-action@v5
@@ -38,8 +42,24 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.OWNER }}/redengine-backend:latest
 
-      # ── Frontend ───────────────────────────────────────────────────────────
-      - name: Build & push frontend
+      # ── Frontend (plain build for error visibility) ────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend deps
+        working-directory: ./frontend
+        run: npm install --legacy-peer-deps
+
+      - name: Test frontend build
+        working-directory: ./frontend
+        env:
+          NEXT_PUBLIC_API_URL: ${{ env.NEXT_PUBLIC_API_URL }}
+        run: npm run build
+
+      # ── Frontend Docker ────────────────────────────────────────────────────
+      - name: Build & push frontend image
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
@@ -47,8 +67,6 @@ jobs:
           build-args: |
             NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}
           tags: ghcr.io/${{ env.OWNER }}/redengine-frontend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       # ── Nginx ──────────────────────────────────────────────────────────────
       - name: Build & push nginx
