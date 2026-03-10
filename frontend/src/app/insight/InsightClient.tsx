@@ -110,6 +110,7 @@ export default function InsightPage() {
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupSubreddits, setNewGroupSubreddits] = useState<Set<string>>(new Set());
+  const [_editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [selectedSubredditGroup, setSelectedSubredditGroup] = useState<string | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<'ai' | 'pain' | 'advice' | 'narrative'>('ai');
   const [selectedColorMetric, setSelectedColorMetric] = useState<'none' | 'comments' | 'ups' | 'date' | 'upvote_ratio'>('none');
@@ -1989,6 +1990,12 @@ export default function InsightPage() {
                                   selectedSubredditGroup === group.id ? 'text-[#FF3B3B]' : 'text-[#E6E6EB]'
                                 }`}>{group.name}</span>
                                 <div className="flex items-center gap-1.5">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setEditingGroupId(group.id); }}
+                                    className="p-1 text-[#A1A1AA] hover:text-[#E6E6EB] transition-colors"
+                                  >
+                                    <Edit2 className="w-3 h-3" />
+                                  </button>
                                   <button
                                     onClick={(e) => { e.stopPropagation(); setSubredditGroups(prev => prev.filter(g => g.id !== group.id)); if (selectedSubredditGroup === group.id) setSelectedSubredditGroup(null); }}
                                     className="p-1 text-[#A1A1AA] hover:text-red-400 transition-colors"
