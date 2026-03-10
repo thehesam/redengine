@@ -1,0 +1,33 @@
+services:
+  nginx:
+    image: ghcr.io/${GITHUB_USERNAME}/redengine-nginx:latest
+    container_name: redengine-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+
+  backend:
+    image: ghcr.io/${GITHUB_USERNAME}/redengine-backend:latest
+    container_name: redengine-backend
+    restart: unless-stopped
+    expose:
+      - "5000"
+    environment:
+      - PORT=5000
+      - DATABASE_URL=${DATABASE_URL}
+      - REDDIT_CLIENT_ID=${REDDIT_CLIENT_ID}
+      - REDDIT_CLIENT_SECRET=${REDDIT_CLIENT_SECRET}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CORS_ORIGIN=https://redengine.upengine.app
+
+  frontend:
+    image: ghcr.io/${GITHUB_USERNAME}/redengine-frontend:latest
+    container_name: redengine-frontend
+    restart: unless-stopped
+    expose:
+      - "3000"
+    depends_on:
+      - backend
